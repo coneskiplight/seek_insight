@@ -1,0 +1,67 @@
+import networkx as nx
+import matplotlib.pyplot as plt
+import pandas as pd
+
+# Sample data (replace with your actual data)
+data = {
+    'sp_cust_id': [101, 102, 103, 101, 104],
+    'cp_cust_id': [201, 202, 201, 203, 202],
+    'tot_pay_cnt': [5, 3, 2, 7, 4],
+    'top_pay_amt': [1000, 500, 300, 1500, 800]
+}
+
+# Create DataFrame
+df = pd.DataFrame(data)
+
+# Initialize graph
+G = nx.DiGraph()  # Use DiGraph for directed relationships (sp -> cp)
+
+# Add edges with attributes from DataFrame
+for _, row in df.iterrows():
+    # Add edge from sp_cust_id to cp_cust_id
+    G.add_edge(
+        row['sp_cust_id'], 
+        row['cp_cust_id'],
+        payment_count=row['tot_pay_cnt'],
+        top_amount=row['top_pay_amt']
+    )
+
+# Prepare layout for visualization
+pos = nx.spring_layout(G, seed=42)  # Consistent layout
+
+# Get edge attributes for visualization
+edge_weights = [G[u][v]['payment_count'] for u, v in G.edges()]
+edge_colors = [G[u][v]['top_pay_amt'] for u, v in G.edges()]
+
+# Draw nodes
+nx.draw_networkx_nodes(G, pos, node_size=1000, node_color='lightblue')
+
+# Draw edges with thickness based on payment count and color based on top amount
+nx.draw_networkx_edges(
+    G, pos, 
+    width=[w/2 for w in edge_weights],  # Scale weights for visibility
+    edge_color=edge_colors,
+    edge_cmap=plt.cm.Blues,  # Color gradient for payment amounts
+    arrowstyle='->'
+)
+
+# Draw labels
+nx.draw_networkx_labels(G, pos, font_size=12)
+
+# Add color bar for edge amounts
+sm = plt.cm.ScalarMappable(cmap=plt.cm.Blues, 
+                           norm=plt.Normalize(min(edge_colors), max(edge_colors)))
+sm.set_array([])
+plt.colorbar(sm, label='Top Payment Amount')
+
+# Add title
+plt.title('Customer Payment Network')
+plt.axis('off')  # Turn off axis
+plt.show()
+
+# Network analysis example metrics
+print("Number of nodes:", G.number_of_nodes())
+print("Number of edges:", G.number_of_edges())
+print("Degree centrality:", nx.degree_centrality(G))  # Most connected nodes
+print("Betweenness centrality:", nx.betweenness_centrality(G))  # Nodes as connectors
+    
