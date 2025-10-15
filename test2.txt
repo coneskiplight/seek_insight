@@ -1,0 +1,91 @@
+import networkx as nx
+import matplotlib.pyplot as plt
+import pandas as pd
+
+def draw_specific_node_network(df, target_node, k=0.3):
+    # 初始化有向图
+    G = nx.DiGraph()
+    
+    # 从DataFrame添加边和属性
+    for _, row in df.iterrows():
+        G.add_edge(
+            row['sp_cust_id'], 
+            row['cp_cust_id'],
+            payment_count=row['tot_pay_cnt'],
+            top_amount=row['top_pay_amt']
+        )
+    
+    # 检查目标节点是否存在于图中
+    if target_node not in G.nodes:
+        print(f"节点 {target_node} 不在图中")
+        return
+    
+    # 获取与目标节点直接相关的所有节点（邻居）
+    # 包括前驱节点（指向目标节点的）和后继节点（目标节点指向的）
+    neighbors = list(G.predecessors(target_node)) + list(G.successors(target_node))
+    # 构建子图节点集合：目标节点 + 所有邻居
+    subgraph_nodes = [target_node] + neighbors
+    
+    # 创建只包含这些节点的子图
+    subgraph = G.subgraph(subgraph_nodes)
+    
+    # 准备布局
+    pos = nx.spring_layout(subgraph, seed=42, k=k)  # k控制节点间距
+    
+    # 获取边的属性用于可视化
+    edge_weights = [subgraph[u][v]['payment_count'] for u, v in subgraph.edges()]
+    edge_colors = [subgraph[u][v]['top_amount'] for u, v in subgraph.edges()]
+    
+    # 绘制节点 - 目标节点用不同颜色突出显示
+    node_colors = ['lightgreen' if node == target_node else 'lightblue' for node in subgraph.nodes()]
+    nx.draw_networkx_nodes(subgraph, pos, node_size=1200, node_color=node_colors)
+    
+    # 绘制边 - 粗细基于支付次数，颜色基于最高支付金额
+    nx.draw_networkx_edges(
+        subgraph, pos, 
+        width=[w/2 for w in edge_weights],  # 缩放权重以便更好地显示
+        edge_color=edge_colors,
+        edge_cmap=plt.cm.Blues,
+        arrowstyle='->'
+    )
+    
+    # 绘制标签
+    nx.draw_networkx_labels(subgraph, pos, font_size=12, font_weight='bold')
+    
+    # 添加边属性标签（支付次数）
+    edge_labels = {(u, v): f"{d['payment_count']}次\n{int(d['top_amount'])}元" 
+                  for u, v, d in subgraph.edges(data=True)}
+    nx.draw_networkx_edge_labels(subgraph, pos, edge_labels=edge_labels, font_size=8)
+    
+    # 添加颜色条表示最高支付金额
+    sm = plt.cm.ScalarMappable(cmap=plt.cm.Blues, 
+                              norm=plt.Normalize(min(edge_colors), max(edge_colors)))
+    sm.set_array([])
+    plt.colorbar(sm, label='最高支付金额')
+    
+    # 添加标题
+    plt.title(f'客户 {target_node} 的支付关系网络')
+    plt.axis('off')  # 关闭坐标轴
+    plt.tight_layout()
+    plt.show()
+    
+    # 显示子图的基本信息
+    print(f"节点 {target_node} 的网络分析:")
+    print(f"相关节点数量: {subgraph.number_of_nodes()}")
+    print(f"相关边数量: {subgraph.number_of_edges()}")
+    print(f"直接付款给 {target_node} 的客户: {list(subgraph.predecessors(target_node))}")
+    print(f"{target_node} 直接付款的客户: {list(subgraph.successors(target_node))}")
+
+# 示例数据（可用实际数据替换）
+data = {
+    'sp_cust_id': [101, 102, 103, 101, 104, 101, 105, 102],
+    'cp_cust_id': [201, 202, 201, 203, 202, 202, 201, 203],
+    'tot_pay_cnt': [5, 3, 2, 7, 4, 2, 6, 3],
+    'top_pay_amt': [1000, 500, 300, 1500, 800, 400, 1200, 600]
+}
+
+# 创建DataFrame
+df = pd.DataFrame(data)
+
+# 绘制指定节点的网络 - 可以修改这里的节点ID来查看不同节点的网络
+draw_specific_node_network(df, target_node=101)
