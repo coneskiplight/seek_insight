@@ -1,18 +1,1 @@
-
-Advanced Analytics: Cash Flow Analysis Project
-
-Beyond AI, I focused on advanced analytics in cash flow management, with core objectives to identify potential customers for lending and investment products and detect early-stage business opportunities. To achieve these goals, I integrated multiple analytic tools and sub-projects, leveraging their collaborative strengths to form a systematic analysis framework.
-
-Data and Tools
-
-• Data Sources: Utilized industry data (MV3 salmon), traditional internal data (including deposit balances, internal and external information), and counterparty data to ensure comprehensive and accurate analysis.
-
-• Integrated Analytics Workflow:
-
-1. Cash Flow Catalyzation: First, I used this tool to segment companies based on short-term cash flow behaviors, enabling the identification of enterprises with distinct growth momentum.
-
-2. Spectral Analysis: For the emerging companies screened in the previous step, this tool was applied to measure their cash flow stability, verifying whether their growth momentum was supported by reliable financial fundamentals.
-
-3. Neural Analysis: This tool helped validate the role and influence of target companies within their respective ecosystems, providing insights into their market positioning and cooperation potential.
-
-4. Cash Flow Future Prediction: After completing the above analyses and prototype verification, I used this tool to forecast net cash flow trends for the next 6 months. This step confirmed the future operational prospects of target companies, allowing us to prioritize key targets and formulate the final "Orange Strategy".
+nnn
